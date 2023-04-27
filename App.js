@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { StyleSheet, View, Button, FlatList, Image } from "react-native";
-
+import React, { useState, useEffect } from "react";
+import { StyleSheet, View, Button, FlatList } from "react-native";
+import { firebase } from "./firebaseConfig.js";
 import TodoItem from "./components/TodoItem";
 import TodoInput from "./components/TodoInput";
 import DisplayImage from "./components/DisplayImage";
@@ -9,24 +9,51 @@ import Header from "./components/Header";
 export default function App() {
   const [tasks, setTasks] = useState([]);
   const [addTasks, setAddTasks] = useState(false);
+  const todoRef = firebase.firestore().collection("tasks");
 
   const addTaskHandler = (taskTitle) => {
-    setTasks((currentTasks) => [
-      ...currentTasks,
-      { id: Math.random().toString(), value: taskTitle },
-    ]);
+    //set Data
+    const data = {
+      title: taskTitle,
+      status: false,
+      date: new Date(),
+    };
+
+    //Insert data into Firebase
+    todoRef.add(data);
+
     setAddTasks(false);
   };
 
   const deleteTaskHandler = (taskId) => {
-    setTasks((currentTasks) => {
-      return currentTasks.filter((task) => task.id !== taskId);
-    });
+    //Delete document
+    todoRef.doc(taskId).delete();
+    getFirebaseData();
   };
 
   const canceltaskAdditionHandler = () => {
     setAddTasks(false);
   };
+
+  //Get firebase data
+  const getFirebaseData = () => {
+    todoRef.orderBy("date").onSnapshot((querySnapshot) => {
+      const getTasksFromFirebase = [];
+      if (querySnapshot.size == 0) {
+        setTasks([]);
+      }
+      querySnapshot.forEach((task) => {
+        getTasksFromFirebase.push({ ...task.data(), key: task.id });
+        setTasks(getTasksFromFirebase);
+      });
+    });
+  };
+
+  // runs on app load, and every time addTasks changes.
+  useEffect(() => {
+    //get firebase data
+    getFirebaseData();
+  }, []);
 
   return (
     <View>
@@ -43,13 +70,15 @@ export default function App() {
 
       <View style={styles.screenlist}>
         <FlatList
-          keyExtractor={(item, index) => item.id}
           data={tasks}
+          key={tasks.key}
           renderItem={(itemData) => (
             <TodoItem
-              title={itemData.item.value}
+              title={itemData.item.title}
+              status={itemData.item.status}
               onDelete={deleteTaskHandler}
-              id={itemData.item.id}
+              id={itemData.item.key}
+              key={itemData.item.key}
             />
           )}
         ></FlatList>
@@ -68,5 +97,3 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
 });
-
-//putra

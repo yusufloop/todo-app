@@ -10,13 +10,15 @@
   },
   "dependencies": {
     "@react-native-community/checkbox": "^0.5.15",
-    "expo": "~48.0.11",
+    "expo": "^48.0.15",
     "expo-checkbox": "^2.3.1",
     "expo-status-bar": "~1.4.4",
+    "firebase": "^9.20.0",
     "react": "18.2.0",
+    "react-dom": "^18.2.0",
     "react-native": "0.71.6",
-    "react-native-web": "~0.18.10",
-    "react-dom": "18.2.0"
+    "react-native-progress": "^5.0.0",
+    "react-native-web": "^0.19.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
